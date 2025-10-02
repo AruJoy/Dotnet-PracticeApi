@@ -1,0 +1,6 @@
+@PrecticeApi_HostAddress = http://localhost:5202
+
+GET {{PrecticeApi_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
