@@ -1,20 +1,29 @@
+using Microsoft.OpenApi.Models;
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Swagger/OpenAPI 설정
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+builder.Services.AddSwaggerGen(c =>
+{
+    c.SwaggerDoc("v1", new OpenApiInfo { Title = "Practice API", Version = "v1" });
+});
 
 var app = builder.Build();
 
+// Swagger UI 활성화
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
-    app.UseSwaggerUI(); // ✅ Swagger UI 미들웨어 추가
+    app.UseSwaggerUI(c =>
+    {
+        c.SwaggerEndpoint("/swagger/v1/swagger.json", "Practice API V1");
+    });
 }
 
 app.UseHttpsRedirection();
 
-// 예시 API (나중에 UsersController 대체 예정)
+// 예시 API
 var summaries = new[]
 {
     "Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching"
