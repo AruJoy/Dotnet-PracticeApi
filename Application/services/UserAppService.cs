@@ -1,4 +1,4 @@
-using PracticeApi.Domain.Entities;
+using PracticeApi.Application.DTOs;
 using PracticeApi.Domain.Interfaces;
 
 namespace PracticeApi.Application.services
@@ -22,25 +22,47 @@ namespace PracticeApi.Application.services
             _repo = repo;
         }
 
-        public async Task<IEnumerable<User>> GetAllAsync()
+        public async Task<IEnumerable<UserResponse>> GetAllAsync()
         {
             // interface 의 해당 함수가 async 이므로,
             // 상위에서는 결과 보장되어야 하면 await 키워드 필수
-            return await _repo.GetAllAsync();
+            // return await _repo.GetAllAsync();
+
+            // _repo 에서 반환한 User entity 를 바로 사용하지 않음
+            // 왜? 사용되는 service 마다 필요한 값과 엔티티에게 요구하는 행동이 다르기 때문
+            var users = await _repo.GetAllAsync();
+
+            // js 의 Map 과 같은 동작을 하는 메서드인듯?
+            return users.Select(u => new UserResponse
+            {
+                Id = u.Id,
+                Name = u.Name,
+                Level = u.Level
+            });
         }
 
-        public async Task<User?> GetByIdAsync(int id)
+        public async Task<UserResponse?> GetByIdAsync(int id)
         {
-            return await _repo.GetByIdAsync(id);
+            // return await _repo.GetByIdAsync(id);
+
+            var user = await _repo.GetByIdAsync(id);
+            if (user == null) return null;
+
+            return new UserResponse
+            {
+                Id = user.Id,
+                Name = user.Name,
+                Level = user.Level
+            };
         }
         // 새로운 유저 엔티티를 Builder 패턴으로 생성
         // - 유효성 검사(이름 공백 등)는 도메인 내부에서 수행됨
         // - Application 계층은 도메인 객체 조립만 담당
         // - Repository를 통해 저장, SaveChangesAsync로 트랜잭션 커밋
 
-        public async Task<User> CreateAsync(string name, int level = 1)
+        public async Task<UserResponse> CreateAsync(string name, int level = 1)
         {
-            var user = new User.Builder()
+            var user = new Domain.Entities.User.Builder()
                 .SetName(name)
                 .SetLevel(level)
                 .Build();
@@ -48,7 +70,14 @@ namespace PracticeApi.Application.services
             await _repo.AddAsync(user);
             // DB에 반영
             await _repo.SaveChangesAsync();
-            return user;
+            return new UserResponse
+            {
+                // Create 시에 builder 에서 설정이 안됐는데? => 이후 id 를 쓰는 로직 사용시 0의 아이디 참조 가능성?
+                // dotnet orm 에서 SaveChangesAsync 하며 할당?
+                Id = user.Id,
+                Name = user.Name,
+                Level = user.Level
+            };
         }
     }
 }

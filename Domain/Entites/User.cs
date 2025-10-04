@@ -12,7 +12,7 @@ namespace PracticeApi.Domain.Entities
             Name = name;
             Level = level;
         }
-        // builder 패턴: 기존의 readyonly, instance 패턴에서 변형
+        // builder 패턴: 기존의 readonly, instance 패턴에서 변형
         // 장점:
         //  - 필수값(name)과 선택값(level)을 명시적으로 설정 가능
         //  - 불변(immutable) 엔티티 생성 보장

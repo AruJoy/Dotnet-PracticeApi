@@ -1,4 +1,5 @@
 using Microsoft.OpenApi.Models;
+using PracticeApi.Infrastructure.Middleware;
 using PracticeApi.Application.services;
 using PracticeApi.Domain.Interfaces;
 using PracticeApi.Infrastructure.Repositories;
@@ -35,6 +36,7 @@ builder.Services.AddScoped<UserAppService>();
 // 2️⃣ 앱 빌드
 // =====================
 var app = builder.Build();
+app.UseMiddleware<ExceptionMiddleware>();
 
 // =====================
 // 3️⃣ Swagger 설정
@@ -57,6 +59,13 @@ app.UseHttpsRedirection();
 // Controller 라우팅 매핑
 app.MapControllers();
 
+// 최종 미들웨어 파이프 라인
+// app.UseMiddleware<ExceptionMiddleware>(); // 1. 가장 먼저 예외 잡기
+// app.UseHttpsRedirection();               // 2. HTTP→HTTPS
+// app.UseRouting();                        // 3. 라우팅 테이블 준비
+// app.UseAuthentication();                 // 4. 인증
+// app.UseAuthorization();                  // 5. 권한
+// app.MapControllers();                    // 6. 엔드포인트 (여기서 실제 컨트롤러 실행)
 // =====================
 // 5️⃣ 앱 실행
 // =====================

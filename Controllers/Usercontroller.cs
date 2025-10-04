@@ -3,8 +3,9 @@
 using Microsoft.AspNetCore.Mvc;
 // service 계층
 using PracticeApi.Application.services;
-using PracticeApi.Domain.Entities;
-
+// using PracticeApi.Domain.Entities;
+using PracticeApi.Application.DTOs;
+using PracticeApi.Application.Common.Response;
 // 컨트롤러 관리 네임스페이스
 // 도메인들의 엔드포인트를 총합하여 관리
 namespace PracticeApi.Controllers
@@ -41,7 +42,7 @@ namespace PracticeApi.Controllers
             var user = await _service.GetByIdAsync(id);
             if (user == null)
                 // 찾는 유저가 없을경우, resource 부재 404번 status 를 포함한 정규 response 반환
-                return NotFound(new { message = "User not found" });
+                return NotFound(ApiResponse<string>.Fail("user not found"));
             // 찾으면 300
             return Ok(user);
         }
@@ -54,13 +55,9 @@ namespace PracticeApi.Controllers
         {
             var user = await _service.CreateAsync(request.Name, request.Level);
             // 등록후 create 가 제대로 되었는지 확실히 하기위해 db 에서 다시 반환
-            return CreatedAtAction(nameof(GetById), new { id = user.Id }, user);
+            return CreatedAtAction(nameof(GetById),
+                new { id = user.Id },
+                ApiResponse<UserResponse>.Ok(user, "User created successfully"));
         }
-    }
-    // 가입을 위한 request body(DTO)
-    public class CreateUserRequest
-    {
-        public string Name { get; set; } = "";
-        public int Level { get; set; } = 1;
     }
 }

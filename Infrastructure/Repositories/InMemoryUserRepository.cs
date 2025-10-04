@@ -33,11 +33,12 @@ namespace PracticeApi.Infrastructure.Repositories
         // 실제 환경에서는 EF Core AddAsync()로 대체되어 DB Insert 수행
         public Task<User> AddAsync(User user)
         {
+            // Builder로 복제 생성
             var newUser = new User.Builder()
                 .SetName(user.Name)
                 .SetLevel(user.Level)
                 .Build();
-
+            newUser.GetType().GetProperty("Id")?.SetValue(newUser, _users.Count + 1);
             _users.Add(newUser);
             // db 응답으로 얻어진 유저 반황
             return Task.FromResult(newUser);
