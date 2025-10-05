@@ -8,6 +8,10 @@ using FluentValidation;
 // ASP.NET Core: .NET 기반 프레임 워크
 using FluentValidation.AspNetCore;
 using PracticeApi.Application.DTOs;
+// AutoMapper 라이브러리 사용
+using AutoMapper;
+// 작성한 Mapper를 사용
+using PracticeApi.Application.Common.Mapping;
 
 var builder = WebApplication.CreateBuilder(args);
 

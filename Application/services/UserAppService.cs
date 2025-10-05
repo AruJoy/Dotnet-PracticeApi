@@ -1,3 +1,4 @@
+using AutoMapper;
 using PracticeApi.Application.DTOs;
 using PracticeApi.Domain.Interfaces;
 
@@ -11,18 +12,23 @@ namespace PracticeApi.Application.services
         // 초기 생성시 설정 후 임의 조작 제한
         // 캡슐화
         private readonly IUserRepository _repo;
-        //
         private readonly ILogger<UserAppService> _logger;
+        // mapper의 경우, 비즈니스 로직흐름에 영향을 주지 않고 공통적으로 사용
+        // -> singleton
+        private readonly IMapper _mapper;
         // service 계층, 레포지토리를 참조해서 사용
         // interFace 를 받아서 사용(특정구현체에 제한 X)
         // IUserRepository 인터페이스를 주입받음
         // → DIP(의존성 역전 원칙) 준수: 구체 구현(InMemory, EFCore 등)과 분리
         // → OCP(개방-폐쇄 원칙): 새로운 Repository 구현이 추가돼도 서비스 코드는 수정 불필요
         // 기본 생성자의 매개변수에 DI 명시하고, class 냐부 변수에 할당
-        public UserAppService(IUserRepository repo, ILogger<UserAppService> logger)
+        public UserAppService(IUserRepository repo,
+                                ILogger<UserAppService>
+                                logger, IMapper mapper)
         {
             _repo = repo;
             _logger = logger;
+            _mapper = mapper;
         }
 
         public async Task<IEnumerable<UserResponse>> GetAllAsync()
@@ -37,12 +43,17 @@ namespace PracticeApi.Application.services
             var users = await _repo.GetAllAsync();
 
             // js 의 Map 과 같은 동작을 하는 메서드인듯?
-            return users.Select(u => new UserResponse
-            {
-                Id = u.Id,
-                Name = u.Name,
-                Level = u.Level
-            });
+            // return users.Select(u => new UserResponse
+            // {
+            //     Id = u.Id,
+            //     Name = u.Name,
+            //     Level = u.Level
+            // });
+
+            // 작성한 mapper 사용
+            // users entity list 를 UserResponse dto로 변환 반환
+            // 여기서 Map은 iterator 연산이 아닌, Mapper의 함수
+            return _mapper.Map<IEnumerable<UserResponse>>(users);
         }
 
         public async Task<UserResponse?> GetByIdAsync(int id)
@@ -52,12 +63,14 @@ namespace PracticeApi.Application.services
             var user = await _repo.GetByIdAsync(id);
             if (user == null) return null;
 
-            return new UserResponse
-            {
-                Id = user.Id,
-                Name = user.Name,
-                Level = user.Level
-            };
+            // return new UserResponse
+            // {
+            //     Id = user.Id,
+            //     Name = user.Name,
+            //     Level = user.Level
+            // };
+
+            return _mapper.Map<UserResponse>(user);
         }
         // 새로운 유저 엔티티를 Builder 패턴으로 생성
         // - 유효성 검사(이름 공백 등)는 도메인 내부에서 수행됨
@@ -74,14 +87,15 @@ namespace PracticeApi.Application.services
             await _repo.AddAsync(user);
             // DB에 반영
             await _repo.SaveChangesAsync();
-            return new UserResponse
-            {
-                // Create 시에 builder 에서 설정이 안됐는데? => 이후 id 를 쓰는 로직 사용시 0의 아이디 참조 가능성?
-                // dotnet orm 에서 SaveChangesAsync 하며 할당?
-                Id = user.Id,
-                Name = user.Name,
-                Level = user.Level
-            };
+            // return new UserResponse
+            // {
+            //     // Create 시에 builder 에서 설정이 안됐는데? => 이후 id 를 쓰는 로직 사용시 0의 아이디 참조 가능성?
+            //     // dotnet orm 에서 SaveChangesAsync 하며 할당?
+            //     Id = user.Id,
+            //     Name = user.Name,
+            //     Level = user.Level
+            // };
+            return _mapper.Map<UserResponse>(user);
         }
     }
 }
