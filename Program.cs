@@ -3,6 +3,11 @@ using PracticeApi.Infrastructure.Middleware;
 using PracticeApi.Application.services;
 using PracticeApi.Domain.Interfaces;
 using PracticeApi.Infrastructure.Repositories;
+// dotnet validator tool FluentValidation 사용 
+using FluentValidation;
+// ASP.NET Core: .NET 기반 프레임 워크
+using FluentValidation.AspNetCore;
+using PracticeApi.Application.DTOs;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -12,6 +17,17 @@ var builder = WebApplication.CreateBuilder(args);
 
 // Controller 기반 MVC 서비스 추가
 builder.Services.AddControllers();
+
+// Controller 실행 전, FluentValidation을 통해 request 자동 검사
+builder.Services.AddFluentValidationAutoValidation();
+// CreateUserRequest를 사용하는 endpoint에서 자동 검사 진행
+builder.Services.AddValidatorsFromAssemblyContaining<CreateUserRequest>();
+//builder.Services.AddValidatorsFromAssemblyContaining() 그냥쓴다면
+// AbstractValidator 를 상속받은 동일 Assembly 모든 validator 를 자동 등록
+
+// using PracticeApi.Application.validators 후에,
+// builder.Services.AddValidatorsFromAssemblyContaining<CreateUserRequestValidator>();
+// 식으로 validator 클래스 단위로 등록하는게 표준
 
 // Swagger/OpenAPI 설정
 builder.Services.AddEndpointsApiExplorer();
@@ -23,6 +39,7 @@ builder.Services.AddSwaggerGen(c =>
         Version = "v1",
         Description = "A layered architecture practice API (Domain / Application / Infrastructure)"
     });
+    c.TagActionsBy(api => new[] { api.GroupName ?? "Default" });
 });
 
 // Repository 인터페이스 - 구현체 연결 (DI 등록)
