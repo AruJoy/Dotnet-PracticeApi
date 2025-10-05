@@ -22,7 +22,7 @@ builder.Services.AddControllers();
 builder.Services.AddFluentValidationAutoValidation();
 // CreateUserRequest를 사용하는 endpoint에서 자동 검사 진행
 builder.Services.AddValidatorsFromAssemblyContaining<CreateUserRequest>();
-//builder.Services.AddValidatorsFromAssemblyContaining() 그냥쓴다면
+//builder.Services.AddValidatorsFromAssembly(Assembly.GetExecutingAssembly()) 그냥쓴다면
 // AbstractValidator 를 상속받은 동일 Assembly 모든 validator 를 자동 등록
 
 // using PracticeApi.Application.validators 후에,
@@ -44,10 +44,18 @@ builder.Services.AddSwaggerGen(c =>
 
 // Repository 인터페이스 - 구현체 연결 (DI 등록)
 // IUserRepository 의존 시 InMemoryUserRepository 주입
+// Di 생명주기 명시 - AddScoped: 해당 DI를  scoped 생명주기로 등록
+// 매 HTTP 요청마다 독립적인 생성과 작동
 builder.Services.AddScoped<IUserRepository, InMemoryUserRepository>();
 
 // Application Service 등록
 builder.Services.AddScoped<UserAppService>();
+
+// 모든 요청이 공통적으로 동작해야 하는 경우, 아래방식으로 singleton 삽입
+// builder.Services.AddSingleton<>
+
+// 매 요청시 새로운 객체로 진행해야 하면, 아래 Transient 삽입
+// builder.Services.AddTransient<>
 
 // =====================
 // 2️⃣ 앱 빌드
