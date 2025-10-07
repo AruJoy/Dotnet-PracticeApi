@@ -2,7 +2,7 @@
 // RESTful 엔드포인트 구현을 위한 Attribute 기반 라우팅 및 응답 처리 지원
 using Microsoft.AspNetCore.Mvc;
 // service 계층
-using PracticeApi.Application.services;
+using PracticeApi.Application.Services;
 // using PracticeApi.Domain.Entities;
 using PracticeApi.Application.DTOs;
 using PracticeApi.Application.Common.Response;
@@ -63,10 +63,9 @@ namespace PracticeApi.Controllers
         [HttpGet("search")]
         // ?쿼리명 = 값
         // 형태의 쿼리인자: [FromQuery] 어트리뷰션 필요
-        public async Task<IActionResult> Serch([FromQuery] string? keyword,
-                            [FromQuery] int? minLevel, [FromQuery] int? maxLevel)
+        public async Task<IActionResult> Serch([FromQuery] UserSearchRequest request)
         {
-            var result = await _service.SearchAsync(keyword, minLevel, maxLevel);
+            var result = await _service.SearchAsync(request.Keyword, request.MinLevel, request.MaxLevel);
             return Ok(result);
         }
     }

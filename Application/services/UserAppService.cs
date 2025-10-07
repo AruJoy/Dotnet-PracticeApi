@@ -4,7 +4,7 @@ using PracticeApi.Domain.Interfaces;
 // 정규식을 위한 import
 using System.Text.RegularExpressions;
 
-namespace PracticeApi.Application.services
+namespace PracticeApi.Application.Services
 {
     // Application Layer의 서비스 클래스
     // 비즈니스 유즈케이스를 정의하고, Repository 인터페이스를 이용해 도메인 객체를 관리한다.
@@ -106,23 +106,23 @@ namespace PracticeApi.Application.services
 
         public async Task<IEnumerable<UserResponse>> SearchAsync(string? keyword, int? minLevel, int? maxLevel)
         {
-            if (!string.IsNullOrWhiteSpace(keyword))
-            {
-                // 유저 이름 인자에 대한 정규식 검사
-                if (!regex.IsMatch(keyword))
-                    // 정규식과 다를경우,Exception throw
-                    throw new ArgumentException("영어, 한글 외 숫자와 특수문자는 입력할 수 없습니다.");
-            }
-            if (minLevel.HasValue)
-            {
-                if (minLevel.Value < 1)
-                    throw new ArgumentException("레벨은 최소 1 이상 입력해 주세요.");
-            }
-            if (maxLevel.HasValue)
-            {
-                if (maxLevel.Value > 99)
-                    throw new ArgumentException("레벨은 최대 99 이하로 입력해 주세요.");
-            }
+            // if (!string.IsNullOrWhiteSpace(keyword))
+            // {
+            //     // 유저 이름 인자에 대한 정규식 검사
+            //     if (!regex.IsMatch(keyword))
+            //         // 정규식과 다를경우,Exception throw
+            //         throw new ArgumentException("영어, 한글 외 숫자와 특수문자는 입력할 수 없습니다.");
+            // }
+            // if (minLevel.HasValue)
+            // {
+            //     if (minLevel.Value < 1)
+            //         throw new ArgumentException("레벨은 최소 1 이상 입력해 주세요.");
+            // }
+            // if (maxLevel.HasValue)
+            // {
+            //     if (maxLevel.Value > 99)
+            //         throw new ArgumentException("레벨은 최대 99 이하로 입력해 주세요.");
+            // }
             // 새로 생성한 repository 함수 호출
             var users = await _repo.SearchAsync(keyword, minLevel, maxLevel);
             // auto mapper 를 톨해 Response 반환

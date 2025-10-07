@@ -1,6 +1,6 @@
 using Microsoft.OpenApi.Models;
 using PracticeApi.Infrastructure.Middleware;
-using PracticeApi.Application.services;
+using PracticeApi.Application.Services;
 using PracticeApi.Domain.Interfaces;
 using PracticeApi.Infrastructure.Repositories;
 // dotnet validator tool FluentValidation 사용 
@@ -17,7 +17,7 @@ using Microsoft.EntityFrameworkCore;
 using PracticeApi.Infrastructure.Data;
 
 // 
-using PracticeApi.Application.validators;
+using PracticeApi.Application.Validators;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -32,7 +32,7 @@ builder.Services.AddControllers();
 builder.Services.AddFluentValidationAutoValidation();
 // CreateUserRequest를 사용하는 endpoint에서 자동 검사 진행
 builder.Services.AddValidatorsFromAssemblyContaining<CreateUserRequestValidator>();
-builder.Services.AddValidatorsFromAssemblyContaining<CreateUserRequestValidator>();
+builder.Services.AddValidatorsFromAssemblyContaining<SearchUserRequestValidator>();
 //builder.Services.AddValidatorsFromAssembly(Assembly.GetExecutingAssembly()) 그냥쓴다면
 // AbstractValidator 를 상속받은 동일 Assembly 모든 validator 를 자동 등록
 

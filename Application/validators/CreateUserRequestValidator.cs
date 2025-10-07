@@ -3,7 +3,7 @@ using FluentValidation;
 // 해당 validator 에서 검사할 namespace 불러오기
 using PracticeApi.Application.DTOs;
 
-namespace PracticeApi.Application.validators
+namespace PracticeApi.Application.Validators
 {
     // FluentValidation 에서 지원하는 추상validator에 검사하려는 dto를 제네릭으로 넣어서 class 생성
     public class CreateUserRequestValidator : AbstractValidator<CreateUserRequest>
