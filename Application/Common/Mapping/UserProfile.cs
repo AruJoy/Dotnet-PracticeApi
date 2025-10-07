@@ -11,6 +11,9 @@ namespace PracticeApi.Application.Common.Mapping
     public class UserProfile : Profile
     {
         // 기본 생성자
+        // AutoMapper는 Lazy하지 않다 → 즉시 변환된다.
+        // (LINQ Select()처럼 yield 기반 지연 실행이 아님)
+        // -> db 단계에선 사용 금지
         public UserProfile()
         {
             // 매핑1. User entity를 UserResponse Dto로 변환

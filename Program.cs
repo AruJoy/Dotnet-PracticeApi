@@ -12,6 +12,9 @@ using PracticeApi.Application.DTOs;
 using AutoMapper;
 // 작성한 Mapper를 사용
 using PracticeApi.Application.Common.Mapping;
+// EFcore 사용
+using Microsoft.EntityFrameworkCore;
+using PracticeApi.Infrastructure.Data;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -50,10 +53,19 @@ builder.Services.AddSwaggerGen(c =>
 // IUserRepository 의존 시 InMemoryUserRepository 주입
 // Di 생명주기 명시 - AddScoped: 해당 DI를  scoped 생명주기로 등록
 // 매 HTTP 요청마다 독립적인 생성과 작동
-builder.Services.AddScoped<IUserRepository, InMemoryUserRepository>();
+// builder.Services.AddScoped<IUserRepository, InMemoryUserRepository>();
 
+// 작성한 db context를 등록
+// 등록만 된 뒤, 각 HTTP요청에서 사용시 생성 => scoped di주기
+builder.Services.AddDbContext<AppDbContext>(options =>
+    options.UseSqlite("Data Source=app.db"));
+// Repository를 EFCore 기반 구현체로 교체
+builder.Services.AddScoped<IUserRepository, EfUserRepository>();
 // Application Service 등록
 builder.Services.AddScoped<UserAppService>();
+// UserProfile을 포함하는 어셈블리를 스캔해서,
+// AutoMapper 매핑 설정을 전부 컨테이너에 자동으로 등록
+builder.Services.AddAutoMapper(typeof(UserProfile));
 
 // 모든 요청이 공통적으로 동작해야 하는 경우, 아래방식으로 singleton 삽입
 // builder.Services.AddSingleton<>
