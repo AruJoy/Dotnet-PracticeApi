@@ -43,7 +43,7 @@ namespace PracticeApi.Controllers
             if (user == null)
                 // 찾는 유저가 없을경우, resource 부재 404번 status 를 포함한 정규 response 반환
                 return NotFound(ApiResponse<string>.Fail("user not found"));
-            // 찾으면 300
+            // 찾으면 200 ok
             return Ok(user);
         }
 
@@ -58,6 +58,16 @@ namespace PracticeApi.Controllers
             return CreatedAtAction(nameof(GetById),
                 new { id = user.Id },
                 ApiResponse<UserResponse>.Ok(user, "User created successfully"));
+        }
+
+        [HttpGet("search")]
+        // ?쿼리명 = 값
+        // 형태의 쿼리인자: [FromQuery] 어트리뷰션 필요
+        public async Task<IActionResult> Serch([FromQuery] string? keyword,
+                            [FromQuery] int? minLevel, [FromQuery] int? maxLevel)
+        {
+            var result = await _service.SearchAsync(keyword, minLevel, maxLevel);
+            return Ok(result);
         }
     }
 }

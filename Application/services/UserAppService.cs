@@ -1,6 +1,8 @@
 using AutoMapper;
 using PracticeApi.Application.DTOs;
 using PracticeApi.Domain.Interfaces;
+// 정규식을 위한 import
+using System.Text.RegularExpressions;
 
 namespace PracticeApi.Application.services
 {
@@ -15,6 +17,10 @@ namespace PracticeApi.Application.services
         private readonly ILogger<UserAppService> _logger;
         // mapper의 경우, 비즈니스 로직흐름에 영향을 주지 않고 공통적으로 사용
         // -> singleton
+
+        // 검색을 위한 정규식
+        readonly Regex regex = new Regex(@"^[a-zA-Z가-힣]+$");
+
         private readonly IMapper _mapper;
         // service 계층, 레포지토리를 참조해서 사용
         // interFace 를 받아서 사용(특정구현체에 제한 X)
@@ -96,6 +102,31 @@ namespace PracticeApi.Application.services
             //     Level = user.Level
             // };
             return _mapper.Map<UserResponse>(user);
+        }
+
+        public async Task<IEnumerable<UserResponse>> SearchAsync(string? keyword, int? minLevel, int? maxLevel)
+        {
+            if (!string.IsNullOrWhiteSpace(keyword))
+            {
+                // 유저 이름 인자에 대한 정규식 검사
+                if (!regex.IsMatch(keyword))
+                    // 정규식과 다를경우,Exception throw
+                    throw new ArgumentException("영어, 한글 외 숫자와 특수문자는 입력할 수 없습니다.");
+            }
+            if (minLevel.HasValue)
+            {
+                if (minLevel.Value < 1)
+                    throw new ArgumentException("레벨은 최소 1 이상 입력해 주세요.");
+            }
+            if (maxLevel.HasValue)
+            {
+                if (maxLevel.Value > 99)
+                    throw new ArgumentException("레벨은 최대 99 이하로 입력해 주세요.");
+            }
+            // 새로 생성한 repository 함수 호출
+            var users = await _repo.SearchAsync(keyword, minLevel, maxLevel);
+            // auto mapper 를 톨해 Response 반환
+            return _mapper.Map<IEnumerable<UserResponse>>(users);
         }
     }
 }

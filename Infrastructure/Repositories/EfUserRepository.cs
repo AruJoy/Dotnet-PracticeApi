@@ -14,8 +14,8 @@ namespace PracticeApi.Infrastructure.Repositories
     {
         //di 주입 필드
         private readonly AppDbContext _context;
-        //di 자동 주입을 위한 생성자
 
+        //di 자동 주입을 위한 생성자
         public EfUserRepository(AppDbContext context)
         {
             _context = context;
@@ -50,6 +50,35 @@ namespace PracticeApi.Infrastructure.Repositories
         public Task SaveChangesAsync()
         {
             return _context.SaveChangesAsync();
+        }
+
+        // 유저 조회를 위한 동적 쿼리 함수
+        public async Task<IEnumerable<User>> SearchAsync(string? keyword, int? minLevel, int? maxLevel)
+        {
+            // User domain 에 대한 쿼리 생성
+            // IQueryable: 매 조회마다 새로운 쿼리 생성 -> 생명주기 == transient
+            IQueryable<User> query = _context.Users.AsQueryable();
+            if (!string.IsNullOrWhiteSpace(keyword))
+            {
+                // Name column 의 Where문 구문
+                query = query.Where(u => u.Name.Contains(keyword));
+            }
+            if (minLevel.HasValue)
+            {
+                query = query.Where(u => u.Level >= minLevel.Value);
+            }
+            if (maxLevel.HasValue)
+            {
+                query = query.Where(u => u.Level <= maxLevel.Value);
+            }
+
+            // 쿼리중 변경 감지 비활성화: AsNoTracking
+            // 읽기 전용 성능 향상 솔루션
+            return await query.AsNoTracking()
+                                // level에 따라 내림차순
+                                .OrderByDescending(u => u.Level)
+                                // 해당하는 유저를 DB에서 조회하여 메모리 컬렉션(List<User>)로 반환
+                                .ToListAsync();
         }
     }
 }

@@ -16,7 +16,11 @@ namespace PracticeApi.Domain.Interfaces
         Task<User> AddAsync(User user);
         // Repository의 변경사항을 DB에 실제 반영
         // EF Core의 ChangeTracker가 추적한 변경 내역을 커밋(Commit)
-        // (JPA의 flush와 비슷하지만, EF Core는 SaveChanges() 시점에 바로 반영)
+        // (JPA의 flush와 비슷하지만, EF Core는 SaveChanges() 시점에 바로 반영)EF Core는 SaveChangesAsync() 호출 시점에
+        // 내부적으로 트랜잭션을 생성하고, 모든 변경 사항을 한 번에 커밋.
+        // 즉, 여러 Add/Update/Delete가 한 번의 SQL 트랜잭션으로 처리.
         Task SaveChangesAsync();
+        // 새로운 매소드 Interface에 명시
+        Task<IEnumerable<User>> SearchAsync(string? keyword, int? minLevel, int? maxLevel);
     }
 }
