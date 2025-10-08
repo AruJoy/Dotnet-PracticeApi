@@ -104,7 +104,7 @@ namespace PracticeApi.Application.Services
             return _mapper.Map<UserResponse>(user);
         }
 
-        public async Task<IEnumerable<UserResponse>> SearchAsync(string? keyword, int? minLevel, int? maxLevel)
+        public async Task<IEnumerable<UserResponse>> SearchAsync(string? keyword, int? minLevel, int? maxLevel, int page = 1, int pageSize = 10)
         {
             // if (!string.IsNullOrWhiteSpace(keyword))
             // {
@@ -124,7 +124,7 @@ namespace PracticeApi.Application.Services
             //         throw new ArgumentException("레벨은 최대 99 이하로 입력해 주세요.");
             // }
             // 새로 생성한 repository 함수 호출
-            var users = await _repo.SearchAsync(keyword, minLevel, maxLevel);
+            var users = await _repo.SearchAsync(keyword, minLevel, maxLevel, page, pageSize);
             // auto mapper 를 톨해 Response 반환
             return _mapper.Map<IEnumerable<UserResponse>>(users);
         }

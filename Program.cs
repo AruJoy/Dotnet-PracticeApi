@@ -16,9 +16,9 @@ using PracticeApi.Application.Common.Mapping;
 using Microsoft.EntityFrameworkCore;
 using PracticeApi.Infrastructure.Data;
 
-// 
 using PracticeApi.Application.Validators;
 
+using PracticeApi.Infrastructure.Swagger;
 var builder = WebApplication.CreateBuilder(args);
 
 // =====================
@@ -51,6 +51,7 @@ builder.Services.AddSwaggerGen(c =>
         Description = "A layered architecture practice API (Domain / Application / Infrastructure)"
     });
     c.TagActionsBy(api => new[] { api.GroupName ?? "Default" });
+    c.OperationFilter<ApiProducesResponseOperationFilter>();
 });
 
 // Repository 인터페이스 - 구현체 연결 (DI 등록)

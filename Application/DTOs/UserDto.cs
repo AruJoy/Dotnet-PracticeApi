@@ -18,5 +18,7 @@ namespace PracticeApi.Application.DTOs
         public string? Keyword { get; set; }
         public int? MinLevel { get; set; }
         public int? MaxLevel { get; set; }
+        public int? Page { get; set; }
+        public int? PageSize { get; set; }
     }
 }

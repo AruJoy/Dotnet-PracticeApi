@@ -53,14 +53,16 @@ namespace PracticeApi.Infrastructure.Repositories
         }
 
         // 유저 조회를 위한 동적 쿼리 함수
-        public async Task<IEnumerable<User>> SearchAsync(string? keyword, int? minLevel, int? maxLevel)
+        public async Task<IEnumerable<User>> SearchAsync(string? keyword, int? minLevel, int? maxLevel, int page = 1, int pageSize = 10)
         {
             // User domain 에 대한 쿼리 생성
             // IQueryable: 매 조회마다 새로운 쿼리 생성 -> 생명주기 == transient
-            IQueryable<User> query = _context.Users.AsQueryable();
+            IQueryable<User> query = _context.Users.AsNoTracking(); ;
             if (!string.IsNullOrWhiteSpace(keyword))
             {
                 // Name column 의 Where문 구문
+                // 쿼리중 변경 감지 비활성화: AsNoTracking
+                // 읽기 전용 성능 향상 솔루션
                 query = query.Where(u => u.Name.Contains(keyword));
             }
             if (minLevel.HasValue)
@@ -71,12 +73,16 @@ namespace PracticeApi.Infrastructure.Repositories
             {
                 query = query.Where(u => u.Level <= maxLevel.Value);
             }
+            // 페이지 네이션 이전 페이지들의 rows 계산
+            int skip = (page - 1) * pageSize;
 
-            // 쿼리중 변경 감지 비활성화: AsNoTracking
-            // 읽기 전용 성능 향상 솔루션
-            return await query.AsNoTracking()
+            return await query
                                 // level에 따라 내림차순
                                 .OrderByDescending(u => u.Level)
+                                // 찾더라도 건너뛸 row설정
+                                .Skip(skip)
+                                // 이후부터 가져올 row수
+                                .Take(pageSize)
                                 // 해당하는 유저를 DB에서 조회하여 메모리 컬렉션(List<User>)로 반환
                                 .ToListAsync();
         }

@@ -8,6 +8,8 @@ using PracticeApi.Application.DTOs;
 using PracticeApi.Application.Common.Response;
 // 컨트롤러 관리 네임스페이스
 // 도메인들의 엔드포인트를 총합하여 관리
+using PracticeApi.Application.Common.Attributes;
+
 namespace PracticeApi.Controllers
 {
     // 해당 클래스가 controller 관리 하기위한 class 임을 프레임 워크에 알림
@@ -23,6 +25,7 @@ namespace PracticeApi.Controllers
         // required 한정자 사용해야하나? -> direct injection 하기때문에 불필요
         private readonly UserAppService _service = service;
 
+        [ApiProducesResponse(typeof(UserResponse))]
         // get 메서드
         [HttpGet]
         // IActionResult: 애당 컨트롤러의 결과를 내부의 ActionContext 를 통해 반환
@@ -33,6 +36,7 @@ namespace PracticeApi.Controllers
             // data: users(json list 번환) 하여 반환
             return Ok(users);
         }
+        [ApiProducesResponse(typeof(UserResponse))]
         // get 메서드
         // url: api/[controller]/id
         // id 를 param으로 받음
@@ -47,6 +51,7 @@ namespace PracticeApi.Controllers
             return Ok(user);
         }
 
+        [ApiProducesResponse(typeof(UserResponse))]
         // db에 Create 하는 메소드
         // 민감정보등의 보호가 필요함으로 header 가 아닌, 최소한의 보호를 위해 패킷의 body 를 통해 전달
         // 이또한 패킷 탈취후, 패킷 분석등을 통해 탈취 가능하므로 https를 통한 인증서 암호화 필요
@@ -59,14 +64,20 @@ namespace PracticeApi.Controllers
                 new { id = user.Id },
                 ApiResponse<UserResponse>.Ok(user, "User created successfully"));
         }
-
+        [ApiProducesResponse(typeof(UserResponse))]
         [HttpGet("search")]
         // ?쿼리명 = 값
         // 형태의 쿼리인자: [FromQuery] 어트리뷰션 필요
-        public async Task<IActionResult> Serch([FromQuery] UserSearchRequest request)
+        public async Task<IActionResult> Search([FromQuery] UserSearchRequest request)
         {
-            var result = await _service.SearchAsync(request.Keyword, request.MinLevel, request.MaxLevel);
+            int page = request.Page ?? 1;
+            int pageSize = request.PageSize ?? 10;
+
+            var result = await _service.SearchAsync(
+                request.Keyword, request.MinLevel, request.MaxLevel, page, pageSize);
+
             return Ok(result);
+
         }
     }
 }

@@ -21,6 +21,6 @@ namespace PracticeApi.Domain.Interfaces
         // 즉, 여러 Add/Update/Delete가 한 번의 SQL 트랜잭션으로 처리.
         Task SaveChangesAsync();
         // 새로운 매소드 Interface에 명시
-        Task<IEnumerable<User>> SearchAsync(string? keyword, int? minLevel, int? maxLevel);
+        Task<IEnumerable<User>> SearchAsync(string? keyword, int? minLevel, int? maxLevel, int page = 1, int pageSize = 10);
     }
 }
