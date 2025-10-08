@@ -3,7 +3,7 @@ using PracticeApi.Application.DTOs;
 using PracticeApi.Domain.Interfaces;
 // 정규식을 위한 import
 using System.Text.RegularExpressions;
-
+using PracticeApi.Application.Common.Response;
 namespace PracticeApi.Application.Services
 {
     // Application Layer의 서비스 클래스
@@ -127,6 +127,12 @@ namespace PracticeApi.Application.Services
             var users = await _repo.SearchAsync(keyword, minLevel, maxLevel, page, pageSize);
             // auto mapper 를 톨해 Response 반환
             return _mapper.Map<IEnumerable<UserResponse>>(users);
+        }
+        public async Task<PagedResult<UserResponse>> SearchProjectionAsync(
+            string? keyword, int? minLevel, int? maxLevel, int page = 1, int pageSize = 10)
+        {
+            _logger.LogInformation("Projection 기반 검색 실행: {Keyword}", keyword ?? "(null)");
+            return await _repo.SearchProjectionAsync(keyword, minLevel, maxLevel, page, pageSize);
         }
     }
 }

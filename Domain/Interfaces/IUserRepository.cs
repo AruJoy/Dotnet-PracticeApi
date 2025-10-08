@@ -1,5 +1,6 @@
 using PracticeApi.Domain.Entities;
-
+using PracticeApi.Application.Common.Response;
+using PracticeApi.Application.DTOs;
 namespace PracticeApi.Domain.Interfaces
 {
     //repository 관리 interface
@@ -22,5 +23,7 @@ namespace PracticeApi.Domain.Interfaces
         Task SaveChangesAsync();
         // 새로운 매소드 Interface에 명시
         Task<IEnumerable<User>> SearchAsync(string? keyword, int? minLevel, int? maxLevel, int page = 1, int pageSize = 10);
+        Task<PagedResult<UserResponse>> SearchProjectionAsync(
+            string? keyword, int? minLevel, int? maxLevel, int page = 1, int pageSize = 10);
     }
 }

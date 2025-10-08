@@ -25,7 +25,7 @@ namespace PracticeApi.Controllers
         // required 한정자 사용해야하나? -> direct injection 하기때문에 불필요
         private readonly UserAppService _service = service;
 
-        [ApiProducesResponse(typeof(UserResponse))]
+        [ApiProducesResponse(typeof(IEnumerable<UserResponse>))]
         // get 메서드
         [HttpGet]
         // IActionResult: 애당 컨트롤러의 결과를 내부의 ActionContext 를 통해 반환
@@ -34,7 +34,7 @@ namespace PracticeApi.Controllers
             var users = await _service.GetAllAsync();
             // status : 200, code 등을 포함해,
             // data: users(json list 번환) 하여 반환
-            return Ok(users);
+            return Ok(ApiResponse<IEnumerable<UserResponse>>.Ok(users));
         }
         [ApiProducesResponse(typeof(UserResponse))]
         // get 메서드
@@ -48,7 +48,7 @@ namespace PracticeApi.Controllers
                 // 찾는 유저가 없을경우, resource 부재 404번 status 를 포함한 정규 response 반환
                 return NotFound(ApiResponse<string>.Fail("user not found"));
             // 찾으면 200 ok
-            return Ok(user);
+            return Ok(ApiResponse<UserResponse>.Ok(user));
         }
 
         [ApiProducesResponse(typeof(UserResponse))]
@@ -64,7 +64,7 @@ namespace PracticeApi.Controllers
                 new { id = user.Id },
                 ApiResponse<UserResponse>.Ok(user, "User created successfully"));
         }
-        [ApiProducesResponse(typeof(UserResponse))]
+        [ApiProducesResponse(typeof(IEnumerable<UserResponse>))]
         [HttpGet("search")]
         // ?쿼리명 = 값
         // 형태의 쿼리인자: [FromQuery] 어트리뷰션 필요
@@ -76,8 +76,21 @@ namespace PracticeApi.Controllers
             var result = await _service.SearchAsync(
                 request.Keyword, request.MinLevel, request.MaxLevel, page, pageSize);
 
-            return Ok(result);
+            return Ok(ApiResponse<IEnumerable<UserResponse>>.Ok(result));
 
+        }
+
+        [ApiProducesResponse(typeof(PagedResult<UserResponse>))]
+        [HttpGet("search/projection")]
+        public async Task<IActionResult> SearchProjection([FromQuery] UserSearchRequest request)
+        {
+            int page = request.Page ?? 1;
+            int pageSize = request.PageSize ?? 10;
+
+            var result = await _service.SearchProjectionAsync(
+                request.Keyword, request.MinLevel, request.MaxLevel, page, pageSize);
+
+            return Ok(ApiResponse<PagedResult<UserResponse>>.Ok(result));
         }
     }
 }

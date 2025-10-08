@@ -6,6 +6,9 @@ using PracticeApi.Domain.Entities;
 using PracticeApi.Domain.Interfaces;
 // 설정한 Db context
 using PracticeApi.Infrastructure.Data;
+// pagination dto 사용을 위한 import
+using PracticeApi.Application.Common.Response;
+using PracticeApi.Application.DTOs;
 
 namespace PracticeApi.Infrastructure.Repositories
 {
@@ -86,5 +89,46 @@ namespace PracticeApi.Infrastructure.Repositories
                                 // 해당하는 유저를 DB에서 조회하여 메모리 컬렉션(List<User>)로 반환
                                 .ToListAsync();
         }
+
+        public async Task<PagedResult<UserResponse>> SearchProjectionAsync(
+            string? keyword, int? minLevel, int? maxLevel, int page = 1, int pageSize = 10)
+        {
+            IQueryable<User> query = _context.Users.AsNoTracking();
+            if (!string.IsNullOrWhiteSpace(keyword))
+                query = query.Where(u => u.Name.Contains(keyword));
+
+            if (minLevel.HasValue)
+                query = query.Where(u => u.Level >= minLevel.Value);
+
+            if (maxLevel.HasValue)
+                query = query.Where(u => u.Level <= maxLevel.Value);
+
+            // 쿼리 결과의 총 갯수
+            var total = await query.CountAsync();
+
+            int skip = (page - 1) * pageSize;
+
+            var items = await query
+                .OrderByDescending(u => u.Level)
+                .Skip(skip)
+                .Take(pageSize)
+                // items 를 각각 UserResponse로 mapping
+                .Select(u => new UserResponse
+                {
+                    Id = u.Id,
+                    Name = u.Name,
+                    Level = u.Level
+                })
+                .ToListAsync();
+            // pagination 으로 매핑하여 반환
+            return new PagedResult<UserResponse>
+            {
+                Items = items,
+                TotalCount = total,
+                Page = page,
+                PageSize = pageSize
+            };
+        }
+
     }
 }
